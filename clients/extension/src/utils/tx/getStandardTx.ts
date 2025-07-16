@@ -9,6 +9,7 @@ import { match } from '@lib/utils/match'
 import { ethers } from 'ethers'
 
 import { CosmosMsgType } from '../constants'
+import { Msg } from '@keplr-wallet/types'
 
 type TransactionHandlers = {
   [K in TransactionType.WalletTransaction['txType']]: (
@@ -17,26 +18,30 @@ type TransactionHandlers = {
   ) => Promise<TransactionDetails> | TransactionDetails
 }
 
+const handleMsgSend = (chain: Chain, message: Msg, memo?: string) => {
+  return {
+    asset: {
+      chain: chain,
+      ticker: message.value!.amount[0].denom,
+    },
+    amount: {
+      amount: message.value.amount[0].amount,
+      decimals: chainFeeCoin[chain].decimals,
+    },
+    from: message.value.from_address,
+    to: message.value.to_address,
+    data: memo,
+  }
+}
+
 const transactionHandlers: TransactionHandlers = {
   Keplr: (tx, chain) => {
     const [message] = tx.msgs
     console.log('message', message)
 
     return match(message.type, {
-      [CosmosMsgType.MSG_SEND]: () => {
-        return {
-          asset: {
-            chain: chain,
-            ticker: message.value!.amount[0].denom,
-          },
-          amount: {
-            amount: message.value.amount[0].amount,
-            decimals: chainFeeCoin[chain].decimals,
-          },
-          from: message.value.from_address,
-          to: message.value.to_address,
-        }
-      },
+      [CosmosMsgType.MSG_SEND]: () => handleMsgSend(chain, message, tx.memo),
+      [CosmosMsgType.MSG_SEND_THORCHAIN]: () => handleMsgSend(chain, message, tx.memo),
       [CosmosMsgType.MSG_EXECUTE_CONTRACT]: () => {
         // const formattedMessage = JSON.stringify(message.value.msg)
         //   .replace(/^({)/, '$1 ')
@@ -142,7 +147,7 @@ export const getStandardTransactionDetails = async (
   if (!tx || !tx.txType) {
     throw new Error('Invalid transaction object or missing txType')
   }
-
+  console.log('tx.txType', tx.txType)
   const handler = transactionHandlers[tx.txType]
   if (!handler) {
     throw new Error(`Unsupported transaction type: ${tx.txType}`)

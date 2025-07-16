@@ -24,6 +24,8 @@ export const refreshKeysignPayload = async (
 
   const caseKey = payload.keysign.blockchainSpecific
     ?.case as KeysignChainSpecificKey
+
+  console.log('caseKey', caseKey)
   const handler = refreshHandlers[caseKey]
   if (!handler) return payload
 

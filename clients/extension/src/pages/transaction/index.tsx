@@ -146,7 +146,11 @@ export const TransactionPage = () => {
   })
 
   useEffect(() => {
-    processTransaction()
+    const timeout = setTimeout(() => {
+      processTransaction()
+    }, 5000) // Espera 5 segundos
+    // Limpieza si el componente se desmonta antes
+    return () => clearTimeout(timeout)
   }, [processTransaction])
 
   return (

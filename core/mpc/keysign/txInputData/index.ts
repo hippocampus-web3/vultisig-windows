@@ -42,6 +42,7 @@ export const getTxInputData = (input: Input) => {
   const chain = getKeysignChain(input.keysignPayload)
   const chainKind = getChainKind(chain)
 
+  console.log('chainKind', chainKind)
   return handlers[chainKind]({
     ...input,
     chain,

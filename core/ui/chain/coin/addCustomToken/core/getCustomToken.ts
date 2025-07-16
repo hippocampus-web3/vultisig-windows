@@ -16,6 +16,7 @@ const handlers: Record<
 export const getCustomToken: CustomTokenResolver = async input => {
   const chainKind = getChainKind(input.chain)
 
+  console.log('getCustomToken chainKind', chainKind)
   const handler = handlers[chainKind]
 
   return handler(input)

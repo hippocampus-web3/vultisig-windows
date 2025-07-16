@@ -50,6 +50,11 @@ export const getKeysignPayload = (
           id: transaction.transactionDetails.asset.ticker,
         })
 
+        // eslint-disable-next-line no-debugger
+        debugger
+        console.log('transaction', transaction)
+        console.log('localCoin', localCoin)
+
         if (!localCoin) {
           if (transaction.chain === Chain.Solana) {
             if (!transaction.transactionDetails.asset.mint) {

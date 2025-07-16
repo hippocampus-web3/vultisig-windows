@@ -41,6 +41,12 @@ export const knownCosmosTokens: Record<
       decimals: 8,
       priceProviderId: 'rujira',
     },
+    'gaia-atom': {
+      ticker: 'ATOM',
+      logo: 'atom',
+      decimals: 8,
+      priceProviderId: 'rujira',
+    },
     ...kujiraCoinsOnThorChain,
   },
   [Chain.Cosmos]: {

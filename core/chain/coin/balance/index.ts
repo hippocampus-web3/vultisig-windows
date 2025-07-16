@@ -27,7 +27,7 @@ const handlers: Record<ChainKind, CoinBalanceResolver<any>> = {
 
 export const getCoinBalance: CoinBalanceResolver = async input => {
   const chainKind = getChainKind(input.chain)
-
+  console.log('chainKind', chainKind)
   const handler = handlers[chainKind]
 
   return handler(input)

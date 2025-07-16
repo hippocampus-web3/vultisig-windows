@@ -107,10 +107,11 @@ export const getCosmosTxInputData: TxInputDataResolver<'cosmos'> = ({
                 TW.Cosmos.Proto.Message.WasmExecuteContractGeneric.create({
                   senderAddress: contractPayload.senderAddress,
                   contractAddress: contractPayload.contractAddress,
-                  executeMsg: contractPayload.executeMsg,
+                  executeMsg: JSON.stringify(contractPayload.executeMsg),
                   coins: contractPayload.coins.map(c => {
                     return TW.Cosmos.Proto.Amount.create({
-                      denom: c.ticker,
+                      denom:
+                        c.ticker.toLowerCase() === 'ruji' ? 'x/ruji' : c.ticker,
                       amount: keysignPayload.toAmount,
                     })
                   }),

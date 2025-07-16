@@ -27,7 +27,7 @@ const handlers: Record<ChainKind, ExecuteTxResolver<any>> = {
 
 export const executeTx: ExecuteTxResolver = input => {
   const chainKind = getChainKind(input.chain)
-
+  console.log('chainKind', chainKind)
   const handler = handlers[chainKind]
 
   return handler(input)

@@ -30,6 +30,8 @@ export default async () => {
         copyPublicDir: false,
         emptyOutDir: false,
         manifest: false,
+        minify: false,
+        sourcemap: true,
         rollupOptions: {
           input: {
             [chunk]: path.resolve(__dirname, `src/${chunk}/index.ts`),
@@ -72,6 +74,8 @@ export default async () => {
       build: {
         emptyOutDir: false,
         manifest: false,
+        minify: false,
+        sourcemap: true,
         rollupOptions: {
           input: {
             index: path.resolve(__dirname, 'index.html'),

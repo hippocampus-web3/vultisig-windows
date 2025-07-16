@@ -17,6 +17,7 @@ import {
 } from '@keplr-wallet/provider'
 import {
   AccountData,
+  Algo,
   AminoSignResponse,
   BroadcastMode,
   DirectSignResponse,
@@ -35,6 +36,7 @@ import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx'
 import Long from 'long'
 
 import { Cosmos } from './cosmos'
+import { fromBase64 } from '@lib/utils/fromBase64'
 
 class XDEFIMessageRequester {
   constructor() {
@@ -97,11 +99,7 @@ export class XDEFIKeplrProvider extends Keplr {
     chainId: string,
     _signOptions?: KeplrSignOptions
   ): OfflineAminoSigner & OfflineDirectSigner {
-    const cosmSigner = new CosmJSOfflineSigner(
-      chainId,
-      window.xfi.keplr,
-      _signOptions
-    )
+    const cosmSigner = new CosmJSOfflineSigner(chainId, this, _signOptions)
 
     cosmSigner.getAccounts = async (): Promise<AccountData[]> => {
       const currentChainID = await this.cosmosProvider.request({
@@ -121,7 +119,30 @@ export class XDEFIKeplrProvider extends Keplr {
         params: [],
       })
 
-      return accounts as unknown as AccountData[]
+      console.log('accounts', accounts)
+
+      const enrichedAccounts = await Promise.all(
+        (accounts as any).map(
+          async (acc: { address: string; algo: string }) => {
+            const info = await getCosmosAccountInfo({
+              chain: chainId as CosmosChain,
+              address: acc.address,
+            })
+
+            // eslint-disable-next-line no-debugger
+            debugger
+            console.log('info', info)
+
+            return {
+              address: acc.address,
+              algo: acc.algo as Algo,
+              pubkey: fromBase64(info.pubkey?.value),
+            } satisfies AccountData
+          }
+        )
+      )
+
+      return enrichedAccounts as unknown as AccountData[]
     }
 
     return cosmSigner as OfflineAminoSigner & OfflineDirectSigner
@@ -133,7 +154,7 @@ export class XDEFIKeplrProvider extends Keplr {
   ): OfflineAminoSigner {
     const cosmSigner = new CosmJSOfflineSignerOnlyAmino(
       chainId,
-      window.xfi.keplr,
+      this,
       signOptions
     )
 
@@ -296,10 +317,15 @@ export class XDEFIKeplrProvider extends Keplr {
   }
 
   async getKey(chainId: string): Promise<Key> {
-    const accounts = (await this.ensureChainAndGetAccounts(chainId)) as string[]
-    return accounts[0] as unknown as Key
-  }
+    const accounts = (await this.ensureChainAndGetAccounts(chainId)) as any[]
 
+    const transformedAccounts = accounts.map((account: any) => ({
+      ...account,
+      pubKey: account.pubkey,
+    }))
+
+    return transformedAccounts[0]
+  }
   private async ensureChainAndGetAccounts(
     chainId: string
   ): Promise<Messaging.Chain.Response> {
