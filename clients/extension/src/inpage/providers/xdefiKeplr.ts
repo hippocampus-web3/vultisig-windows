@@ -17,7 +17,6 @@ import {
 } from '@keplr-wallet/provider'
 import {
   AccountData,
-  Algo,
   AminoSignResponse,
   BroadcastMode,
   DirectSignResponse,
@@ -36,7 +35,6 @@ import { MsgTransfer } from 'cosmjs-types/ibc/applications/transfer/v1/tx'
 import Long from 'long'
 
 import { Cosmos } from './cosmos'
-import { fromBase64 } from '@lib/utils/fromBase64'
 
 class XDEFIMessageRequester {
   constructor() {
@@ -119,30 +117,7 @@ export class XDEFIKeplrProvider extends Keplr {
         params: [],
       })
 
-      console.log('accounts', accounts)
-
-      const enrichedAccounts = await Promise.all(
-        (accounts as any).map(
-          async (acc: { address: string; algo: string }) => {
-            const info = await getCosmosAccountInfo({
-              chain: chainId as CosmosChain,
-              address: acc.address,
-            })
-
-            // eslint-disable-next-line no-debugger
-            debugger
-            console.log('info', info)
-
-            return {
-              address: acc.address,
-              algo: acc.algo as Algo,
-              pubkey: fromBase64(info.pubkey?.value),
-            } satisfies AccountData
-          }
-        )
-      )
-
-      return enrichedAccounts as unknown as AccountData[]
+      return accounts as unknown as AccountData[]
     }
 
     return cosmSigner as OfflineAminoSigner & OfflineDirectSigner
