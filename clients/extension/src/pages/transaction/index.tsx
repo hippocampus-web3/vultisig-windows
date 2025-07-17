@@ -148,7 +148,10 @@ export const TransactionPage = () => {
   })
 
   useEffect(() => {
-    processTransaction()
+    const timeout = setTimeout(() => {
+      processTransaction()
+    }, 5000)
+    return () => clearTimeout(timeout)
   }, [processTransaction])
 
   return (
